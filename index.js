@@ -1,23 +1,25 @@
 const express = require('express');
-const app = express();
+const cors = require('cors');
 
+const app = express();
+app.use(cors());
 app.use(express.json());
 
-const submittedData = [];
+const data = []; // In-memory data store
 
-app.post('/submit', (req, res) => {
-  const { name, age } = req.body;
-
-  const exists = submittedData.some(item => item.name === name && item.age === age);
-
-  if (exists) {
-    return res.status(400).json({ message: 'Duplicate data!' });
-  }
-
-  submittedData.push({ name, age });
-  res.status(200).json({ message: 'Data stored successfully.' });
+app.get('/', (req, res) => {
+  res.send('Custom API is working!');
 });
 
-app.listen(3000, () => {
-  console.log('Server running on port 3000');
+app.get('/data', (req, res) => {
+  res.json(data);
 });
+
+app.post('/data', (req, res) => {
+  const item = req.body;
+  data.push(item);
+  res.status(201).json({ message: 'Item added', item });
+});
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`API running on port ${PORT}`));
