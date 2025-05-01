@@ -1,25 +1,46 @@
 const express = require('express');
-const cors = require('cors');
-
+const cors = require('cors'); // CORS middleware
 const app = express();
-app.use(cors());
-app.use(express.json());
 
-const data = []; // In-memory data store
+// Basic CORS configuration (customize as needed)
+const corsOptions = {
+  origin: '*', // Allow all origins (change in production)
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed methods
+  allowedHeaders: ['Content-Type', 'Authorization'] // Allowed headers
+};
 
+// Apply CORS middleware
+app.use(cors(corsOptions));
+
+// Example routes
 app.get('/', (req, res) => {
-  res.send('Custom API is working!');
+  res.send('API is running with CORS support');
 });
 
-app.get('/data', (req, res) => {
-  res.json(data);
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'healthy' });
 });
 
-app.post('/data', (req, res) => {
-  const item = req.body;
-  data.push(item);
-  res.status(201).json({ message: 'Item added', item });
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something broke!');
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`API running on port ${PORT}`));
+// Server configuration
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (err) => {
+  console.error('Unhandled rejection:', err);
+});
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught exception:', err);
+  process.exit(1);
+});
